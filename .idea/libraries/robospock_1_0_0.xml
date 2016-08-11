@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="robospock-1.0.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.robospock/robospock/1.0.0/bd52633de062d4279e6aeee9917439d81937cb29/robospock-1.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.robospock/robospock/1.0.0/8e8c005233c5e2e5cc3b51f27bc1f2148cfe460f/robospock-1.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
