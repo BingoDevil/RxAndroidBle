@@ -129,7 +129,9 @@ public class ScanActivity extends AppCompatActivity {
 
     private void onAdapterItemClick(RxBleScanResult scanResults) {
         final String macAddress = scanResults.getBleDevice().getMacAddress();
+        final String deviceName = scanResults.getBleDevice().getName();
         final Intent intent = new Intent(this, DeviceActivity.class);
+        intent.putExtra(DeviceActivity.EXTRA_NAME, deviceName);
         intent.putExtra(DeviceActivity.EXTRA_MAC_ADDRESS, macAddress);
         startActivity(intent);
     }

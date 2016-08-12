@@ -71,7 +71,6 @@ public class ServiceDiscoveryExampleActivity extends RxAppCompatActivity {
     }
 
     private void onAdapterItemClick(DiscoveryResultsAdapter.AdapterItem item) {
-
         if (item.type == DiscoveryResultsAdapter.AdapterItem.CHARACTERISTIC) {
             final Intent intent = new Intent(this, CharacteristicOperationExampleActivity.class);
             intent.putExtra(DeviceActivity.EXTRA_MAC_ADDRESS, macAddress);

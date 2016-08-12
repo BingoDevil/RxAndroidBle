@@ -4,8 +4,10 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.RxBleConnection;
 import com.polidea.rxandroidble.RxBleDevice;
 import com.polidea.rxandroidble.sample.DeviceActivity;
@@ -15,13 +17,17 @@ import com.polidea.rxandroidble.sample.util.HexString;
 import com.polidea.rxandroidble.utils.ConnectionSharingAdapter;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
+import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
 import rx.subjects.PublishSubject;
 
 import static com.trello.rxlifecycle.ActivityEvent.PAUSE;
@@ -43,6 +49,10 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
     Button writeButton;
     @Bind(R.id.notify)
     Button notifyButton;
+    @Bind(R.id.uuid)
+    TextView uuid;
+    @Bind(R.id.main)
+    LinearLayout main;
     private UUID characteristicUuid;
     private PublishSubject<Void> disconnectTriggerSubject = PublishSubject.create();
     private Observable<RxBleConnection> connectionObservable;
@@ -50,7 +60,7 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
 
     @OnClick(R.id.read)
     public void onReadClick() {
-
+        Log.e(getClass().getSimpleName(), "onReadClick");
         if (isConnected()) {
             connectionObservable
                     .flatMap(rxBleConnection -> rxBleConnection.readCharacteristic(characteristicUuid))
@@ -65,20 +75,28 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
 
     @OnClick(R.id.write)
     public void onWriteClick() {
-
+        Log.e(getClass().getSimpleName(), "onWriteClick");
         if (isConnected()) {
             connectionObservable
-                    .flatMap(rxBleConnection -> rxBleConnection.writeCharacteristic(characteristicUuid, getInputBytes()))
+                    .flatMap(new Func1<RxBleConnection, Observable<byte[]>>() {
+                        @Override
+                        public Observable<byte[]> call(RxBleConnection rxBleConnection) {
+                            return rxBleConnection.writeCharacteristic(characteristicUuid, getInputBytes());
+                        }
+                    })
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(bytes -> {
-                        onWriteSuccess();
+                    .subscribe(new Action1<byte[]>() {
+                        @Override
+                        public void call(byte[] bytes) {
+                            onWriteSuccess();
+                        }
                     }, this::onWriteFailure);
         }
     }
 
     @OnClick(R.id.notify)
     public void onNotifyClick() {
-
+        Log.e(getClass().getSimpleName(), "onNotifyClick");
         if (isConnected()) {
             connectionObservable
                     .flatMap(rxBleConnection -> rxBleConnection.setupNotification(characteristicUuid))
@@ -96,6 +114,7 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         ButterKnife.bind(this);
         String macAddress = getIntent().getStringExtra(DeviceActivity.EXTRA_MAC_ADDRESS);
         characteristicUuid = (UUID) getIntent().getSerializableExtra(EXTRA_CHARACTERISTIC_UUID);
+        uuid.setText(characteristicUuid.toString());
         bleDevice = SampleApplication.getRxBleClient(this).getBleDevice(macAddress);
         connectionObservable = bleDevice
                 .establishConnection(this, false)
@@ -109,55 +128,71 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
 
     @OnClick(R.id.connect)
     public void onConnectToggleClick() {
-
+        Log.e(getClass().getSimpleName(), "onConnectToggleClick--" + isConnected());
         if (isConnected()) {
             triggerDisconnect();
         } else {
-            connectionObservable.subscribe(rxBleConnection -> {
-                Log.d(getClass().getSimpleName(), "Hey, connection has been established!");
+            connectionObservable.subscribe(new Action1<RxBleConnection>() {
+                @Override
+                public void call(RxBleConnection rxBleConnection) {
+                    Log.i(getClass().getSimpleName(), "Hey, connection has been established!");
+                }
             }, this::onConnectionFailure);
         }
-
         updateUI();
     }
 
     private boolean isConnected() {
-        return bleDevice.getConnectionState() == RxBleConnection.RxBleConnectionState.CONNECTED;
+        Log.w(getClass().getSimpleName(), bleDevice.getConnectionState() + "----isConnected----" + RxBleConnection.RxBleConnectionState.CONNECTED);
+        if (bleDevice.getConnectionState() == RxBleConnection.RxBleConnectionState.CONNECTING
+                || bleDevice.getConnectionState() == RxBleConnection.RxBleConnectionState.CONNECTED) {
+            return true;
+        } else {
+            return false;
+        }
+        // return bleDevice.getConnectionState() == RxBleConnection.RxBleConnectionState.CONNECTED;
     }
 
     private void onConnectionFailure(Throwable throwable) {
         //noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Connection error: " + throwable, Snackbar.LENGTH_SHORT).show();
+        Log.w(getClass().getSimpleName(), "Connection error: " + throwable.toString());
     }
 
     private void onReadFailure(Throwable throwable) {
         //noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Read error: " + throwable, Snackbar.LENGTH_SHORT).show();
+        Log.w(getClass().getSimpleName(), "Read error: " + throwable.toString());
     }
 
     private void onWriteSuccess() {
         //noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Write success", Snackbar.LENGTH_SHORT).show();
+        Log.w(getClass().getSimpleName(), "Write succes");
     }
 
     private void onWriteFailure(Throwable throwable) {
         //noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Write error: " + throwable, Snackbar.LENGTH_SHORT).show();
+        Log.w(getClass().getSimpleName(), "Write error" + throwable.toString());
     }
 
     private void onNotificationReceived(byte[] bytes) {
         //noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Change: " + HexString.bytesToHex(bytes), Snackbar.LENGTH_SHORT).show();
+        Log.w(getClass().getSimpleName(), "Change" + HexString.bytesToHex(bytes));
     }
 
     private void onNotificationSetupFailure(Throwable throwable) {
         //noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Notifications error: " + throwable, Snackbar.LENGTH_SHORT).show();
+        Log.w(getClass().getSimpleName(), "Notifications error: " + throwable);
     }
 
     private void notificationHasBeenSetUp() {
         //noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Notifications has been set up", Snackbar.LENGTH_SHORT).show();
+        Log.w(getClass().getSimpleName(), "Notifications has been set up");
     }
 
     private void clearSubscription() {

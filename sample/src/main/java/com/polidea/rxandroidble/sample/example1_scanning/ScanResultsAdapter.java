@@ -33,7 +33,6 @@ class ScanResultsAdapter extends RecyclerView.Adapter<ScanResultsAdapter.ViewHol
     }
 
     public interface OnAdapterItemClickListener {
-
         void onAdapterViewClick(View view);
     }
 
@@ -45,7 +44,6 @@ class ScanResultsAdapter extends RecyclerView.Adapter<ScanResultsAdapter.ViewHol
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
             if (onAdapterItemClickListener != null) {
                 onAdapterItemClickListener.onAdapterViewClick(v);
             }
@@ -56,7 +54,6 @@ class ScanResultsAdapter extends RecyclerView.Adapter<ScanResultsAdapter.ViewHol
         // Not the best way to ensure distinct devices, just for sake on the demo.
 
         for (int i = 0; i < data.size(); i++) {
-
             if (data.get(i).getBleDevice().equals(bleScanResult.getBleDevice())) {
                 data.set(i, bleScanResult);
                 notifyItemChanged(i);
