@@ -53,7 +53,8 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
     TextView uuid;
     @Bind(R.id.main)
     LinearLayout main;
-    private UUID characteristicUuid;
+    private UUID characteristicUuid_1;
+    private UUID characteristicUuid_2;
     private PublishSubject<Void> disconnectTriggerSubject = PublishSubject.create();
     private Observable<RxBleConnection> connectionObservable;
     private RxBleDevice bleDevice;
@@ -63,7 +64,7 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         Log.e(getClass().getSimpleName(), "onReadClick");
         if (isConnected()) {
             connectionObservable
-                    .flatMap(rxBleConnection -> rxBleConnection.readCharacteristic(characteristicUuid))
+                    .flatMap(rxBleConnection -> rxBleConnection.readCharacteristic(characteristicUuid_2))
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(bytes -> {
                         readOutputView.setText(new String(bytes));
@@ -81,7 +82,7 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
                     .flatMap(new Func1<RxBleConnection, Observable<byte[]>>() {
                         @Override
                         public Observable<byte[]> call(RxBleConnection rxBleConnection) {
-                            return rxBleConnection.writeCharacteristic(characteristicUuid, getInputBytes());
+                            return rxBleConnection.writeCharacteristic(characteristicUuid_1, getInputBytes());
                         }
                     })
                     .observeOn(AndroidSchedulers.mainThread())
@@ -99,7 +100,7 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         Log.e(getClass().getSimpleName(), "onNotifyClick");
         if (isConnected()) {
             connectionObservable
-                    .flatMap(rxBleConnection -> rxBleConnection.setupNotification(characteristicUuid))
+                    .flatMap(rxBleConnection -> rxBleConnection.setupNotification(characteristicUuid_2))
                     .doOnNext(notificationObservable -> runOnUiThread(this::notificationHasBeenSetUp))
                     .flatMap(notificationObservable -> notificationObservable)
                     .observeOn(AndroidSchedulers.mainThread())
@@ -113,8 +114,9 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         setContentView(R.layout.activity_example4);
         ButterKnife.bind(this);
         String macAddress = getIntent().getStringExtra(DeviceActivity.EXTRA_MAC_ADDRESS);
-        characteristicUuid = (UUID) getIntent().getSerializableExtra(EXTRA_CHARACTERISTIC_UUID);
-        uuid.setText(characteristicUuid.toString());
+        characteristicUuid_1 = (UUID) getIntent().getSerializableExtra(EXTRA_CHARACTERISTIC_UUID);
+        characteristicUuid_2 = UUID.fromString("00008002-0000-1000-8000-00805f9b34fb");
+        uuid.setText(characteristicUuid_1.toString());
         bleDevice = SampleApplication.getRxBleClient(this).getBleDevice(macAddress);
         connectionObservable = bleDevice
                 .establishConnection(this, false)
