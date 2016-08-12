@@ -7,7 +7,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.polidea.rxandroidble.RxBleClient;
 import com.polidea.rxandroidble.RxBleConnection;
 import com.polidea.rxandroidble.RxBleDevice;
 import com.polidea.rxandroidble.sample.DeviceActivity;
@@ -17,14 +16,12 @@ import com.polidea.rxandroidble.sample.util.HexString;
 import com.polidea.rxandroidble.utils.ConnectionSharingAdapter;
 import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
-import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import rx.Observable;
-import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -152,7 +149,6 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         } else {
             return false;
         }
-        // return bleDevice.getConnectionState() == RxBleConnection.RxBleConnectionState.CONNECTED;
     }
 
     private void onConnectionFailure(Throwable throwable) {

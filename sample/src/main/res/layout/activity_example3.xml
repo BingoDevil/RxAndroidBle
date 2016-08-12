@@ -13,7 +13,7 @@
         android:id="@+id/connect"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Connect &amp; discover services"/>
+        android:text="@string/connect_amp_discover_services"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/scan_results"

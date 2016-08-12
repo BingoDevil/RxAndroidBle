@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Bingo</string>
+    <string name="title_activity_scan">ScanActivity</string>
+    <string name="action_settings">设置</string>
+    <string name="start_scan">开始扫描</string>
+    <string name="stop_scan">停止扫描</string>
+    <string name="mac_address">MAC: %s</string>
+    <string name="connection_state">状态: %s</string>
+    <string name="read_rssi">信号: %s</string>
+    <string name="disconnect">断开连接</string>
+    <string name="connect">连接</string>
+    <string name="title_example1">RxAndroidBle</string>
+    <string name="title_example2">Connection &amp; connection state</string>
+    <string name="title_example3">发现服务</string>
+    <string name="title_example4">Characteristic operations</string>
+    <string name="not_clickable">没有动作</string>
+    <string name="write_input">写入输入</string>
+    <string name="read">读取</string>
+    <string name="write">写入</string>
+    <string name="register_notifications">注册监听</string>
+    <string name="service_discovery">扫描服务</string>
+    <string name="autoconnect">自动连接</string>
+    <string name="connect_amp_discover_services">连接和扫描服务</string>
+</resources>
