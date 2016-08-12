@@ -23,7 +23,6 @@ import butterknife.ButterKnife;
 class DiscoveryResultsAdapter extends RecyclerView.Adapter<DiscoveryResultsAdapter.ViewHolder> {
 
     static class AdapterItem {
-
         public static final int SERVICE = 1;
         public static final int CHARACTERISTIC = 2;
         final int type;
@@ -38,7 +37,6 @@ class DiscoveryResultsAdapter extends RecyclerView.Adapter<DiscoveryResultsAdapt
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-
         @Bind(android.R.id.text1)
         public TextView line1;
         @Bind(android.R.id.text2)
@@ -51,7 +49,6 @@ class DiscoveryResultsAdapter extends RecyclerView.Adapter<DiscoveryResultsAdapt
     }
 
     public interface OnAdapterItemClickListener {
-
         void onAdapterViewClick(View view);
     }
 
@@ -60,7 +57,6 @@ class DiscoveryResultsAdapter extends RecyclerView.Adapter<DiscoveryResultsAdapt
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
             if (onAdapterItemClickListener != null) {
                 onAdapterItemClickListener.onAdapterViewClick(v);
             }
@@ -87,7 +83,6 @@ class DiscoveryResultsAdapter extends RecyclerView.Adapter<DiscoveryResultsAdapt
         } else {
             holder.line1.setText(String.format("Characteristic: %s", item.description));
         }
-
         holder.line2.setText(item.uuid.toString());
     }
 
@@ -105,7 +100,6 @@ class DiscoveryResultsAdapter extends RecyclerView.Adapter<DiscoveryResultsAdapt
 
     public void swapScanResult(RxBleDeviceServices services) {
         data.clear();
-
         for (BluetoothGattService service : services.getBluetoothGattServices()) {
             // Add service
             data.add(new AdapterItem(AdapterItem.SERVICE, getServiceType(service), service.getUuid()));
@@ -115,7 +109,6 @@ class DiscoveryResultsAdapter extends RecyclerView.Adapter<DiscoveryResultsAdapt
                 data.add(new AdapterItem(AdapterItem.CHARACTERISTIC, describeProperties(characteristic), characteristic.getUuid()));
             }
         }
-
         notifyDataSetChanged();
     }
 

@@ -32,6 +32,7 @@ import static com.trello.rxlifecycle.ActivityEvent.PAUSE;
 public class CharacteristicOperationExampleActivity extends RxAppCompatActivity {
 
     public static final String EXTRA_CHARACTERISTIC_UUID = "extra_uuid";
+    public static final String EXTRA_CHARACTERISTIC_UUID_2 = "extra_uuid_2";
     @Bind(R.id.connect)
     Button connectButton;
     @Bind(R.id.read_output)
@@ -56,18 +57,51 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
     private Observable<RxBleConnection> connectionObservable;
     private RxBleDevice bleDevice;
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_example4);
+        ButterKnife.bind(this);
+        String macAddress = getIntent().getStringExtra(DeviceActivity.EXTRA_MAC_ADDRESS);
+        characteristicUuid_1 = (UUID) getIntent().getSerializableExtra(EXTRA_CHARACTERISTIC_UUID);
+        characteristicUuid_2 = UUID.fromString("00008002-0000-1000-8000-00805f9b34fb");
+        uuid.setText(characteristicUuid_1.toString());
+        bleDevice = SampleApplication.getRxBleClient(this).getBleDevice(macAddress);
+
+        connectionObservable = bleDevice
+                .establishConnection(this, false)
+                .takeUntil(disconnectTriggerSubject)
+                .compose(bindUntilEvent(PAUSE))
+                .doOnUnsubscribe(this::clearSubscription)
+                .compose(new ConnectionSharingAdapter());
+
+        // noinspection ConstantConditions
+        getSupportActionBar().setSubtitle(getString(R.string.mac_address, macAddress));
+    }
+
     @OnClick(R.id.read)
     public void onReadClick() {
         Log.e(getClass().getSimpleName(), "onReadClick");
         if (isConnected()) {
-            connectionObservable
-                    .flatMap(rxBleConnection -> rxBleConnection.readCharacteristic(characteristicUuid_2))
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(bytes -> {
-                        readOutputView.setText(new String(bytes));
-                        readHexOutputView.setText(HexString.bytesToHex(bytes));
-                        writeInput.setText(HexString.bytesToHex(bytes));
-                    }, this::onReadFailure);
+            connectionObservable.flatMap(new Func1<RxBleConnection, Observable<byte[]>>() {
+                @Override
+                public Observable<byte[]> call(RxBleConnection rxBleConnection) {
+                    return rxBleConnection.readCharacteristic(characteristicUuid_2);
+                }
+            }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<byte[]>() {
+                @Override
+                public void call(byte[] bytes) {
+                    readOutputView.setText(new String(bytes));
+                    readHexOutputView.setText(HexString.bytesToHex(bytes));
+                    writeInput.setText(HexString.bytesToHex(bytes));
+                }
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    onReadFailure(throwable);
+                }
+            });
+
         }
     }
 
@@ -88,7 +122,12 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
                         public void call(byte[] bytes) {
                             onWriteSuccess();
                         }
-                    }, this::onWriteFailure);
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            onWriteFailure(throwable);
+                        }
+                    });
         }
     }
 
@@ -96,33 +135,34 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
     public void onNotifyClick() {
         Log.e(getClass().getSimpleName(), "onNotifyClick");
         if (isConnected()) {
-            connectionObservable
-                    .flatMap(rxBleConnection -> rxBleConnection.setupNotification(characteristicUuid_2))
-                    .doOnNext(notificationObservable -> runOnUiThread(this::notificationHasBeenSetUp))
-                    .flatMap(notificationObservable -> notificationObservable)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(this::onNotificationReceived, this::onNotificationSetupFailure);
+            connectionObservable.flatMap(new Func1<RxBleConnection, Observable<Observable<byte[]>>>() {
+                @Override
+                public Observable<Observable<byte[]>> call(RxBleConnection rxBleConnection) {
+                    return rxBleConnection.setupNotification(characteristicUuid_2);
+                }
+            }).doOnNext(new Action1<Observable<byte[]>>() {
+                @Override
+                public void call(Observable<byte[]> observable) {
+                    notificationHasBeenSetUp();
+                }
+            }).flatMap(new Func1<Observable<byte[]>, Observable<byte[]>>() {
+                @Override
+                public Observable<byte[]> call(Observable<byte[]> notificationObservable) {
+                    return notificationObservable;
+                }
+            }).observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<byte[]>() {
+                        @Override
+                        public void call(byte[] bytes) {
+                            onNotificationReceived(bytes);
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            onNotificationSetupFailure(throwable);
+                        }
+                    });
         }
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_example4);
-        ButterKnife.bind(this);
-        String macAddress = getIntent().getStringExtra(DeviceActivity.EXTRA_MAC_ADDRESS);
-        characteristicUuid_1 = (UUID) getIntent().getSerializableExtra(EXTRA_CHARACTERISTIC_UUID);
-        characteristicUuid_2 = UUID.fromString("00008002-0000-1000-8000-00805f9b34fb");
-        uuid.setText(characteristicUuid_1.toString());
-        bleDevice = SampleApplication.getRxBleClient(this).getBleDevice(macAddress);
-        connectionObservable = bleDevice
-                .establishConnection(this, false)
-                .takeUntil(disconnectTriggerSubject)
-                .compose(bindUntilEvent(PAUSE))
-                .doOnUnsubscribe(this::clearSubscription)
-                .compose(new ConnectionSharingAdapter());
-        //noinspection ConstantConditions
-        getSupportActionBar().setSubtitle(getString(R.string.mac_address, macAddress));
     }
 
     @OnClick(R.id.connect)

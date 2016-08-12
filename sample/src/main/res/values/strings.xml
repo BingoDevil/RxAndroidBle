@@ -21,4 +21,6 @@
     <string name="service_discovery">Service discovery</string>
     <string name="autoconnect">Autoconnect</string>
     <string name="connect_amp_discover_services"><![CDATA[Connect & discover services]]></string>
+    <string name="service">Service:</string>
+    <string name="characteristic">Characteristic:</string>
 </resources>

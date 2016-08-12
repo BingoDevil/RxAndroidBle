@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="48dp"
+    android:layout_marginTop="20dp"
     android:background="?android:attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
@@ -27,7 +28,7 @@
             android:id="@android:id/text1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Service:"
+            android:text="@string/service"
             android:textSize="16sp"
             android:textStyle="bold" />
 
@@ -38,6 +39,4 @@
             android:textSize="14sp"
             tools:text="Line 2" />
     </LinearLayout>
-
-
 </RelativeLayout>
