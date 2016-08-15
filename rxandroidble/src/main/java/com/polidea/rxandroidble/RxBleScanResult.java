@@ -1,5 +1,7 @@
 package com.polidea.rxandroidble;
 
+import java.util.Arrays;
+
 /**
  * Represents a scan result from Bluetooth LE scan.
  */
@@ -39,5 +41,10 @@ public class RxBleScanResult {
      */
     public byte[] getScanRecord() {
         return scanRecord;
+    }
+
+    @Override
+    public String toString() {
+        return bleDevice.getName() + "," + bleDevice.getMacAddress() + ", rssi=" + rssi + ", scanRecord=" + Arrays.toString(scanRecord);
     }
 }

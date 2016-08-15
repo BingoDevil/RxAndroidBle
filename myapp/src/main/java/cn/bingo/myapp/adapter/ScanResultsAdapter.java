@@ -1,4 +1,4 @@
-package com.polidea.rxandroidble.sample.example1_scanning;
+package cn.bingo.myapp.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,21 +14,17 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-
-class ScanResultsAdapter extends RecyclerView.Adapter<ScanResultsAdapter.ViewHolder> {
+public class ScanResultsAdapter extends RecyclerView.Adapter<ScanResultsAdapter.ViewHolder> {
 
     static class ViewHolder extends RecyclerView.ViewHolder {
 
-        @Bind(android.R.id.text1)
         public TextView line1;
-        @Bind(android.R.id.text2)
         public TextView line2;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            line1 = (TextView) itemView.findViewById(android.R.id.text1);
+            line2 = (TextView) itemView.findViewById(android.R.id.text2);
         }
     }
 
@@ -36,9 +32,13 @@ class ScanResultsAdapter extends RecyclerView.Adapter<ScanResultsAdapter.ViewHol
         void onAdapterViewClick(View view);
     }
 
-    private static final Comparator<RxBleScanResult> SORTING_COMPARATOR = (lhs, rhs) -> {
-        return lhs.getBleDevice().getMacAddress().compareTo(rhs.getBleDevice().getMacAddress());
+    private static final Comparator<RxBleScanResult> SORTING_COMPARATOR = new Comparator<RxBleScanResult>() {
+        @Override
+        public int compare(RxBleScanResult lhs, RxBleScanResult rhs) {
+            return lhs.getBleDevice().getMacAddress().compareTo(rhs.getBleDevice().getMacAddress());
+        }
     };
+
     private final List<RxBleScanResult> data = new ArrayList<>();
     private OnAdapterItemClickListener onAdapterItemClickListener;
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -84,7 +84,7 @@ class ScanResultsAdapter extends RecyclerView.Adapter<ScanResultsAdapter.ViewHol
         final RxBleScanResult rxBleScanResult = data.get(position);
         final RxBleDevice bleDevice = rxBleScanResult.getBleDevice();
         holder.line1.setText(String.format("%s (%s)", bleDevice.getMacAddress(), bleDevice.getName()));
-        holder.line2.setText(String.format("RSSI: %d", rxBleScanResult.getRssi()));
+        holder.line2.setText(String.format("rssi: %d", rxBleScanResult.getRssi()));
     }
 
     @Override
