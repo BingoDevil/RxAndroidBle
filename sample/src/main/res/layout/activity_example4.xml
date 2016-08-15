@@ -14,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="14sp" />
+
     <Button
         android:id="@+id/connect"
         android:layout_width="match_parent"
@@ -77,6 +78,13 @@
         android:layout_height="wrap_content"
         android:enabled="false"
         android:text="@string/write" />
+
+    <Button
+        android:id="@+id/write_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="false"
+        android:text="write to 8002" />
 
     <Button
         android:id="@+id/notify"

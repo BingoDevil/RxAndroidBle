@@ -26,13 +26,12 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.subjects.PublishSubject;
-
 import static com.trello.rxlifecycle.ActivityEvent.PAUSE;
 
 public class CharacteristicOperationExampleActivity extends RxAppCompatActivity {
 
     public static final String EXTRA_CHARACTERISTIC_UUID = "extra_uuid";
-    public static final String EXTRA_CHARACTERISTIC_UUID_2 = "extra_uuid_2";
+    public static final String characteristic_2 = "00008002-0000-1000-8000-00805f9b34fb";
     @Bind(R.id.connect)
     Button connectButton;
     @Bind(R.id.read_output)
@@ -51,6 +50,9 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
     TextView uuid;
     @Bind(R.id.main)
     LinearLayout main;
+
+    @Bind(R.id.write_2)
+    Button write2;
     private UUID characteristicUuid_1;
     private UUID characteristicUuid_2;
     private PublishSubject<Void> disconnectTriggerSubject = PublishSubject.create();
@@ -64,7 +66,7 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         ButterKnife.bind(this);
         String macAddress = getIntent().getStringExtra(DeviceActivity.EXTRA_MAC_ADDRESS);
         characteristicUuid_1 = (UUID) getIntent().getSerializableExtra(EXTRA_CHARACTERISTIC_UUID);
-        characteristicUuid_2 = UUID.fromString("00008002-0000-1000-8000-00805f9b34fb");
+        characteristicUuid_2 = UUID.fromString(characteristic_2);
         uuid.setText(characteristicUuid_1.toString());
         bleDevice = SampleApplication.getRxBleClient(this).getBleDevice(macAddress);
 
@@ -131,16 +133,43 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         }
     }
 
+    @OnClick(R.id.write_2)
+    public void onWriteClickTo_8002() {
+        Log.e(getClass().getSimpleName(), "onWriteClickTo_8002");
+        if (isConnected()) {
+            connectionObservable
+                    .flatMap(new Func1<RxBleConnection, Observable<byte[]>>() {
+                        @Override
+                        public Observable<byte[]> call(RxBleConnection rxBleConnection) {
+                            return rxBleConnection.writeCharacteristic(characteristicUuid_2, getInputBytes());
+                        }
+                    })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<byte[]>() {
+                        @Override
+                        public void call(byte[] bytes) {
+                            onWriteSuccess();
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            onWriteFailure(throwable);
+                        }
+                    });
+        }
+    }
+
     @OnClick(R.id.notify)
     public void onNotifyClick() {
         Log.e(getClass().getSimpleName(), "onNotifyClick");
         if (isConnected()) {
-            connectionObservable.flatMap(new Func1<RxBleConnection, Observable<Observable<byte[]>>>() {
-                @Override
-                public Observable<Observable<byte[]>> call(RxBleConnection rxBleConnection) {
-                    return rxBleConnection.setupNotification(characteristicUuid_2);
-                }
-            }).doOnNext(new Action1<Observable<byte[]>>() {
+            connectionObservable
+                    .flatMap(new Func1<RxBleConnection, Observable<Observable<byte[]>>>() {
+                        @Override
+                        public Observable<Observable<byte[]>> call(RxBleConnection rxBleConnection) {
+                            return rxBleConnection.setupNotification(characteristicUuid_2);
+                        }
+                    }).doOnNext(new Action1<Observable<byte[]>>() {
                 @Override
                 public void call(Observable<byte[]> observable) {
                     notificationHasBeenSetUp();
@@ -181,6 +210,11 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         updateUI();
     }
 
+    /**
+     * is connected
+     *
+     * @return connect status
+     */
     private boolean isConnected() {
         Log.w(getClass().getSimpleName(), bleDevice.getConnectionState() + "----isConnected----" + RxBleConnection.RxBleConnectionState.CONNECTED);
         if (bleDevice.getConnectionState() == RxBleConnection.RxBleConnectionState.CONNECTING
@@ -192,25 +226,25 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
     }
 
     private void onConnectionFailure(Throwable throwable) {
-        //noinspection ConstantConditions
+        // noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Connection error: " + throwable, Snackbar.LENGTH_SHORT).show();
         Log.w(getClass().getSimpleName(), "Connection error: " + throwable.toString());
     }
 
     private void onReadFailure(Throwable throwable) {
-        //noinspection ConstantConditions
+        // noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Read error: " + throwable, Snackbar.LENGTH_SHORT).show();
         Log.w(getClass().getSimpleName(), "Read error: " + throwable.toString());
     }
 
     private void onWriteSuccess() {
-        //noinspection ConstantConditions
+        // noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Write success", Snackbar.LENGTH_SHORT).show();
         Log.w(getClass().getSimpleName(), "Write succes");
     }
 
     private void onWriteFailure(Throwable throwable) {
-        //noinspection ConstantConditions
+        // noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Write error: " + throwable, Snackbar.LENGTH_SHORT).show();
         Log.w(getClass().getSimpleName(), "Write error" + throwable.toString());
     }
@@ -222,13 +256,13 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
     }
 
     private void onNotificationSetupFailure(Throwable throwable) {
-        //noinspection ConstantConditions
+        // noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Notifications error: " + throwable, Snackbar.LENGTH_SHORT).show();
         Log.w(getClass().getSimpleName(), "Notifications error: " + throwable);
     }
 
     private void notificationHasBeenSetUp() {
-        //noinspection ConstantConditions
+        // noinspection ConstantConditions
         Snackbar.make(findViewById(R.id.main), "Notifications has been set up", Snackbar.LENGTH_SHORT).show();
         Log.w(getClass().getSimpleName(), "Notifications has been set up");
     }
@@ -246,6 +280,7 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         connectButton.setText(isConnected() ? getString(R.string.disconnect) : getString(R.string.connect));
         readButton.setEnabled(isConnected());
         writeButton.setEnabled(isConnected());
+        write2.setEnabled(isConnected());
         notifyButton.setEnabled(isConnected());
     }
 
