@@ -1,19 +1,22 @@
 package cn.bingo.myapp.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.Activity;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.text.InputType;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import com.polidea.rxandroidble.RxBleClient;
@@ -23,22 +26,20 @@ import com.polidea.rxandroidble.exceptions.BleScanException;
 import cn.bingo.myapp.R;
 import cn.bingo.myapp.SampleApplication;
 import cn.bingo.myapp.adapter.ScanResultsAdapter;
-import rx.Observable;
+import cn.bingo.myapp.utils.MyPixle;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.functions.Action1;
-import rx.functions.Func0;
 
 public class MainActivity extends Activity {
 
     private RxBleClient rxBleClient;
     private Subscription subscription;
-    private TextView scan_text;
+    private EditText scan_text;
     private Button scan_toggle_btn;
     private RecyclerView recyclerView;
     private ScanResultsAdapter resultsAdapter;
-
     private static final int REQUEST_FINE_LOCATION = 0;
 
     /**
@@ -90,10 +91,10 @@ public class MainActivity extends Activity {
         final String macAddress = scanResults.getBleDevice().getMacAddress();
         final String deviceName = scanResults.getBleDevice().getName();
         Toast.makeText(MainActivity.this, macAddress + "--" + deviceName, Toast.LENGTH_SHORT).show();
-        // final Intent intent = new Intent(this, DeviceActivity.class);
-        // intent.putExtra(DeviceActivity.EXTRA_NAME, deviceName);
-        // intent.putExtra(DeviceActivity.EXTRA_MAC_ADDRESS, macAddress);
-        // startActivity(intent);
+        final Intent intent = new Intent(this, DiscoveryServiceActivity.class);
+        intent.putExtra(DiscoveryServiceActivity.EXTRA_NAME, deviceName);
+        intent.putExtra(DiscoveryServiceActivity.EXTRA_MAC_ADDRESS, macAddress);
+        startActivity(intent);
     }
 
     private boolean isScanning() {
@@ -162,7 +163,9 @@ public class MainActivity extends Activity {
     }
 
     private void initView() {
-        scan_text = (TextView) findViewById(R.id.scan_text);
+        scan_text = (EditText) findViewById(R.id.scan_text);
+        // 屏蔽键盘
+        scan_text.setInputType(InputType.TYPE_NULL);
         scan_toggle_btn = (Button) findViewById(R.id.scan_toggle_btn);
         recyclerView = (RecyclerView) findViewById(R.id.scan_results);
     }
@@ -177,4 +180,5 @@ public class MainActivity extends Activity {
             subscription.unsubscribe();
         }
     }
+
 }

@@ -28,10 +28,6 @@ public class ScanResultsAdapter extends RecyclerView.Adapter<ScanResultsAdapter.
         }
     }
 
-    public interface OnAdapterItemClickListener {
-        void onAdapterViewClick(View view);
-    }
-
     private static final Comparator<RxBleScanResult> SORTING_COMPARATOR = new Comparator<RxBleScanResult>() {
         @Override
         public int compare(RxBleScanResult lhs, RxBleScanResult rhs) {
@@ -40,7 +36,15 @@ public class ScanResultsAdapter extends RecyclerView.Adapter<ScanResultsAdapter.
     };
 
     private final List<RxBleScanResult> data = new ArrayList<>();
+
+    public interface OnAdapterItemClickListener {
+        void onAdapterViewClick(View view);
+    }
     private OnAdapterItemClickListener onAdapterItemClickListener;
+    public void setOnAdapterItemClickListener(OnAdapterItemClickListener onAdapterItemClickListener) {
+        this.onAdapterItemClickListener = onAdapterItemClickListener;
+    }
+
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -92,9 +96,5 @@ public class ScanResultsAdapter extends RecyclerView.Adapter<ScanResultsAdapter.
         final View itemView = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.two_line_list_item, parent, false);
         itemView.setOnClickListener(onClickListener);
         return new ViewHolder(itemView);
-    }
-
-    public void setOnAdapterItemClickListener(OnAdapterItemClickListener onAdapterItemClickListener) {
-        this.onAdapterItemClickListener = onAdapterItemClickListener;
     }
 }

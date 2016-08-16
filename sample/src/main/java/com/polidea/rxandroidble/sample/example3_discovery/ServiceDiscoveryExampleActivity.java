@@ -10,6 +10,7 @@ import android.widget.Button;
 
 import com.polidea.rxandroidble.RxBleConnection;
 import com.polidea.rxandroidble.RxBleDevice;
+import com.polidea.rxandroidble.RxBleDeviceServices;
 import com.polidea.rxandroidble.sample.DeviceActivity;
 import com.polidea.rxandroidble.sample.R;
 import com.polidea.rxandroidble.sample.SampleApplication;
@@ -19,7 +20,11 @@ import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
+import rx.functions.Action1;
+import rx.functions.Func1;
 
 import static com.trello.rxlifecycle.ActivityEvent.PAUSE;
 
@@ -36,12 +41,32 @@ public class ServiceDiscoveryExampleActivity extends RxAppCompatActivity {
     @OnClick(R.id.connect)
     public void onConnectToggleClick() {
         bleDevice.establishConnection(this, false)
-                .flatMap(RxBleConnection::discoverServices)
+                .flatMap(new Func1<RxBleConnection, Observable<RxBleDeviceServices>>() {
+                    @Override
+                    public Observable<RxBleDeviceServices> call(RxBleConnection rxBleConnection) {
+                        return rxBleConnection.discoverServices();
+                    }
+                })
                 .first() // Disconnect automatically after discovery
                 .compose(bindUntilEvent(PAUSE))
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnUnsubscribe(this::updateUI)
-                .subscribe(adapter::swapScanResult, this::onConnectionFailure);
+                .doOnUnsubscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        updateUI();
+                    }
+                })
+                .subscribe(new Action1<RxBleDeviceServices>() {
+                    @Override
+                    public void call(RxBleDeviceServices rxBleDeviceServices) {
+                        adapter.swapScanResult(rxBleDeviceServices);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        onConnectionFailure(throwable);
+                    }
+                });
         updateUI();
     }
 

@@ -1,87 +1,142 @@
-package com.polidea.rxandroidble.sample.example4_characteristic;
+package cn.bingo.myapp.activity;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.text.InputType;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.polidea.rxandroidble.RxBleConnection;
 import com.polidea.rxandroidble.RxBleDevice;
-import com.polidea.rxandroidble.sample.DeviceActivity;
-import com.polidea.rxandroidble.sample.R;
-import com.polidea.rxandroidble.sample.SampleApplication;
-import com.polidea.rxandroidble.sample.util.HexString;
 import com.polidea.rxandroidble.utils.ConnectionSharingAdapter;
-import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
 import java.util.UUID;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
+import cn.bingo.myapp.R;
+import cn.bingo.myapp.SampleApplication;
+import cn.bingo.myapp.utils.ByteKeyBoard;
+import cn.bingo.myapp.utils.HexString;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.subjects.PublishSubject;
-import static com.trello.rxlifecycle.ActivityEvent.PAUSE;
 
-public class CharacteristicOperationExampleActivity extends RxAppCompatActivity {
+/**
+ * Created by Bingo on 16/8/16
+ */
+public class CharacteristicOperationActivity extends Activity implements View.OnClickListener {
 
-    public static final String EXTRA_CHARACTERISTIC_UUID = "extra_uuid";
-    public static final String characteristic_2 = "00008002-0000-1000-8000-00805f9b34fb";
-    @Bind(R.id.connect)
-    Button connectButton;
-    @Bind(R.id.read_output)
-    TextView readOutputView;
-    @Bind(R.id.read_hex_output)
-    TextView readHexOutputView;
-    @Bind(R.id.write_input)
-    TextView writeInput;
-    @Bind(R.id.read)
-    Button readButton;
-    @Bind(R.id.write)
-    Button writeButton;
-    @Bind(R.id.notify)
-    Button notifyButton;
-    @Bind(R.id.uuid)
-    TextView uuid;
-    @Bind(R.id.main)
-    LinearLayout main;
-    @Bind(R.id.write_2)
-    Button write2;
+    public static final String CHARACTERISTIC_1 = "characteristic_1";
+    public static final String CHARACTERISTIC_2 = "00008002-0000-1000-8000-00805f9b34fb";
+
+    private TextView title;
+    private Button connectButton;
+    private TextView readOutputView;
+    private TextView readHexOutputView;
+    private TextView writeInput;
+    private Button readButton;
+    private Button writeButton;
+    private Button notifyButton;
+    private LinearLayout main;
+    private Button writeButton_2;
 
     private UUID characteristicUuid_1;
     private UUID characteristicUuid_2;
     private PublishSubject<Void> disconnectTriggerSubject = PublishSubject.create();
     private Observable<RxBleConnection> connectionObservable;
     private RxBleDevice bleDevice;
+    private String deviceName;
+    private String macAddress;
+
+    private PopupWindow PopupWindow;
+    private View putView;
+
+    private String sendText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_example4);
-        ButterKnife.bind(this);
-        String macAddress = getIntent().getStringExtra(DeviceActivity.EXTRA_MAC_ADDRESS);
-        characteristicUuid_1 = (UUID) getIntent().getSerializableExtra(EXTRA_CHARACTERISTIC_UUID);
-        characteristicUuid_2 = UUID.fromString(characteristic_2);
-        uuid.setText(characteristicUuid_1.toString());
-        bleDevice = SampleApplication.getRxBleClient(this).getBleDevice(macAddress);
+        setContentView(R.layout.activity_characteristic_operation);
+        deviceName = getIntent().getStringExtra(DiscoveryServiceActivity.EXTRA_NAME);
+        macAddress = getIntent().getStringExtra(DiscoveryServiceActivity.EXTRA_MAC_ADDRESS);
+        characteristicUuid_1 = (UUID) getIntent().getSerializableExtra(CHARACTERISTIC_1);
+        characteristicUuid_2 = UUID.fromString(CHARACTERISTIC_2);
 
+        initView();
+        putView = getLayoutInflater().inflate(R.layout.shares_keyboard, null);
+
+        bleDevice = SampleApplication.getRxBleClient(this).getBleDevice(macAddress);
         connectionObservable = bleDevice
                 .establishConnection(this, false)
                 .takeUntil(disconnectTriggerSubject)
-                .compose(bindUntilEvent(PAUSE))
-                .doOnUnsubscribe(this::clearSubscription)
+                // .compose(bindUntilEvent(PAUSE))
+                .doOnUnsubscribe(new Action0() {
+                    @Override
+                    public void call() {
+                        clearSubscription();
+                    }
+                })
                 .compose(new ConnectionSharingAdapter());
-
-        // noinspection ConstantConditions
-        getSupportActionBar().setSubtitle(getString(R.string.mac_address, macAddress));
     }
 
-    @OnClick(R.id.read)
+    private void initView() {
+        main = (LinearLayout) findViewById(R.id.main);
+        title = (TextView) findViewById(R.id.title);
+        title.setText(deviceName + "---" + macAddress);
+
+        connectButton = (Button) findViewById(R.id.connect);
+        readOutputView = (TextView) findViewById(R.id.read_output);
+        readHexOutputView = (TextView) findViewById(R.id.read_hex_output);
+
+        writeInput = (TextView) findViewById(R.id.write_input);
+        // 屏蔽键盘
+        writeInput.setInputType(InputType.TYPE_NULL);
+
+        readButton = (Button) findViewById(R.id.read);
+        writeButton = (Button) findViewById(R.id.write);
+        writeButton_2 = (Button) findViewById(R.id.write_2);
+        notifyButton = (Button) findViewById(R.id.notify);
+
+        connectButton.setOnClickListener(this);
+        writeInput.setOnClickListener(this);
+        readButton.setOnClickListener(this);
+        writeButton.setOnClickListener(this);
+        writeButton_2.setOnClickListener(this);
+        notifyButton.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.write_input:
+                ByteKeyBoard.ShowKeyboard(PopupWindow, putView, CharacteristicOperationActivity.this, title,writeInput);
+                break;
+            case R.id.connect:
+                onConnectToggleClick();
+                break;
+            case R.id.read:
+                onReadClick();
+                break;
+            case R.id.write:
+                onWriteClick();
+                break;
+            case R.id.write_2:
+                onWriteClickTo_8002();
+                break;
+            case R.id.notify:
+                onNotifyClick();
+                break;
+        }
+    }
+
     public void onReadClick() {
         Log.e(getClass().getSimpleName(), "onReadClick");
         if (isConnected()) {
@@ -103,11 +158,9 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
                     onReadFailure(throwable);
                 }
             });
-
         }
     }
 
-    @OnClick(R.id.write)
     public void onWriteClick() {
         Log.e(getClass().getSimpleName(), "onWriteClick");
         if (isConnected()) {
@@ -133,7 +186,6 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         }
     }
 
-    @OnClick(R.id.write_2)
     public void onWriteClickTo_8002() {
         Log.e(getClass().getSimpleName(), "onWriteClickTo_8002");
         if (isConnected()) {
@@ -159,7 +211,6 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         }
     }
 
-    @OnClick(R.id.notify)
     public void onNotifyClick() {
         Log.e(getClass().getSimpleName(), "onNotifyClick");
         if (isConnected()) {
@@ -194,9 +245,11 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         }
     }
 
-    @OnClick(R.id.connect)
     public void onConnectToggleClick() {
         Log.e(getClass().getSimpleName(), "onConnectToggleClick--" + isConnected());
+        if (connectionObservable == null) {
+            return;
+        }
         if (isConnected()) {
             triggerDisconnect();
         } else {
@@ -205,7 +258,12 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
                 public void call(RxBleConnection rxBleConnection) {
                     Log.i(getClass().getSimpleName(), "Hey, connection has been established!");
                 }
-            }, this::onConnectionFailure);
+            }, new Action1<Throwable>() {
+                @Override
+                public void call(Throwable throwable) {
+                    onConnectionFailure(throwable);
+                }
+            });
         }
         updateUI();
     }
@@ -263,7 +321,7 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
 
     private void notificationHasBeenSetUp() {
         // noinspection ConstantConditions
-        Snackbar.make(findViewById(R.id.main), "Notifications has been set up", Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(findViewById(R.id.main), "Notifications has been set up", Snackbar.LENGTH_LONG).show();
         Log.w(getClass().getSimpleName(), "Notifications has been set up");
     }
 
@@ -280,7 +338,7 @@ public class CharacteristicOperationExampleActivity extends RxAppCompatActivity 
         connectButton.setText(isConnected() ? getString(R.string.disconnect) : getString(R.string.connect));
         readButton.setEnabled(isConnected());
         writeButton.setEnabled(isConnected());
-        write2.setEnabled(isConnected());
+        writeButton_2.setEnabled(isConnected());
         notifyButton.setEnabled(isConnected());
     }
 
