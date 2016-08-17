@@ -96,7 +96,7 @@ public class ScanResultsAdapter extends RecyclerView.Adapter<ScanResultsAdapter.
         // holder.line1.setText(String.format("%s (%s)", bleDevice.getMacAddress(), bleDevice.getName()));
         holder.line1.setText(bleDevice.getMacAddress());
         holder.name.setText(bleDevice.getName());
-        holder.line2.setText(String.format("rssi: %d", rxBleScanResult.getRssi()));
+        holder.line2.setText(rxBleScanResult.getRssi()+"");
     }
 
     @Override

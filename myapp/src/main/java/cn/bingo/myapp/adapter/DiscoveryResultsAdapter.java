@@ -104,6 +104,11 @@ public class DiscoveryResultsAdapter extends RecyclerView.Adapter<DiscoveryResul
         this.onAdapterItemClickListener = onAdapterItemClickListener;
     }
 
+    /**
+     * swap Scan Result
+     *
+     * @param services s
+     */
     public void swapScanResult(RxBleDeviceServices services) {
         data.clear();
         for (BluetoothGattService service : services.getBluetoothGattServices()) {
@@ -129,18 +134,42 @@ public class DiscoveryResultsAdapter extends RecyclerView.Adapter<DiscoveryResul
         return data.get(position);
     }
 
+    /**
+     * get Service Type
+     *
+     * @param service
+     * @return primary or secondary
+     */
     private String getServiceType(BluetoothGattService service) {
         return service.getType() == BluetoothGattService.SERVICE_TYPE_PRIMARY ? "primary" : "secondary";
     }
 
+    /**
+     * is Characteristic Notifiable
+     *
+     * @param characteristic c
+     * @return t
+     */
     private boolean isCharacteristicNotifiable(BluetoothGattCharacteristic characteristic) {
         return (characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_NOTIFY) != 0;
     }
 
+    /**
+     * is Characteristic Readable
+     *
+     * @param characteristic c
+     * @return t
+     */
     private boolean isCharacteristicReadable(BluetoothGattCharacteristic characteristic) {
         return ((characteristic.getProperties() & BluetoothGattCharacteristic.PROPERTY_READ) != 0);
     }
 
+    /**
+     * is Characteristic Writeable
+     *
+     * @param characteristic c
+     * @return t
+     */
     private boolean isCharacteristicWriteable(BluetoothGattCharacteristic characteristic) {
         return (characteristic.getProperties() & (BluetoothGattCharacteristic.PROPERTY_WRITE
                 | BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE)) != 0;

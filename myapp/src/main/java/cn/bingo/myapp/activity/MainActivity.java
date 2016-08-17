@@ -27,6 +27,9 @@ import cn.bingo.myapp.R;
 import cn.bingo.myapp.SampleApplication;
 import cn.bingo.myapp.adapter.ScanResultsAdapter;
 import cn.bingo.myapp.utils.MyPixle;
+import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -67,19 +70,41 @@ public class MainActivity extends Activity {
         initView();
         initClick();
 
-        recyclerView.setHasFixedSize(true);
-        LinearLayoutManager recyclerLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(recyclerLayoutManager);
-        resultsAdapter = new ScanResultsAdapter();
-        recyclerView.setAdapter(resultsAdapter);
-        resultsAdapter.setOnAdapterItemClickListener(new ScanResultsAdapter.OnAdapterItemClickListener() {
+        Observable<ScanResultsAdapter> observable = Observable.create(new Observable.OnSubscribe<ScanResultsAdapter>() {
             @Override
-            public void onAdapterViewClick(View view) {
-                final int childAdapterPosition = recyclerView.getChildAdapterPosition(view);
-                final RxBleScanResult itemAtPosition = resultsAdapter.getItemAtPosition(childAdapterPosition);
-                onAdapterItemClick(itemAtPosition);
+            public void call(Subscriber<? super ScanResultsAdapter> subscriber) {
+                recyclerView.setHasFixedSize(true);
+                LinearLayoutManager recyclerLayoutManager = new LinearLayoutManager(MainActivity.this);
+                recyclerView.setLayoutManager(recyclerLayoutManager);
+                resultsAdapter = new ScanResultsAdapter();
+                subscriber.onNext(resultsAdapter);
             }
         });
+        Subscriber<ScanResultsAdapter> subscriber = new Subscriber<ScanResultsAdapter>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onNext(ScanResultsAdapter scanResultsAdapter) {
+                recyclerView.setAdapter(resultsAdapter);
+                resultsAdapter.setOnAdapterItemClickListener(new ScanResultsAdapter.OnAdapterItemClickListener() {
+                    @Override
+                    public void onAdapterViewClick(View view) {
+                        final int childAdapterPosition = recyclerView.getChildAdapterPosition(view);
+                        final RxBleScanResult itemAtPosition = resultsAdapter.getItemAtPosition(childAdapterPosition);
+                        onAdapterItemClick(itemAtPosition);
+                    }
+                });
+            }
+        };
+        observable.subscribe(subscriber);
     }
 
     /**
