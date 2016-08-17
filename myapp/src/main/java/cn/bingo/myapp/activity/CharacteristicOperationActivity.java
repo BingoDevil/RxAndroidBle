@@ -7,6 +7,7 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -41,7 +42,7 @@ public class CharacteristicOperationActivity extends Activity implements View.On
     private Button connectButton;
     private TextView readOutputView;
     private TextView readHexOutputView;
-    private TextView writeInput;
+    private EditText writeInput;
     private Button readButton;
     private Button writeButton;
     private Button notifyButton;
@@ -58,8 +59,6 @@ public class CharacteristicOperationActivity extends Activity implements View.On
 
     private PopupWindow PopupWindow;
     private View putView;
-
-    private String sendText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +95,7 @@ public class CharacteristicOperationActivity extends Activity implements View.On
         readOutputView = (TextView) findViewById(R.id.read_output);
         readHexOutputView = (TextView) findViewById(R.id.read_hex_output);
 
-        writeInput = (TextView) findViewById(R.id.write_input);
+        writeInput = (EditText) findViewById(R.id.write_input);
         // 屏蔽键盘
         writeInput.setInputType(InputType.TYPE_NULL);
 

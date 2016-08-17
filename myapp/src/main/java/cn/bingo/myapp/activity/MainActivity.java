@@ -90,7 +90,7 @@ public class MainActivity extends Activity {
     private void onAdapterItemClick(RxBleScanResult scanResults) {
         final String macAddress = scanResults.getBleDevice().getMacAddress();
         final String deviceName = scanResults.getBleDevice().getName();
-        Toast.makeText(MainActivity.this, macAddress + "--" + deviceName, Toast.LENGTH_SHORT).show();
+        // Toast.makeText(MainActivity.this, macAddress + "--" + deviceName, Toast.LENGTH_SHORT).show();
         final Intent intent = new Intent(this, DiscoveryServiceActivity.class);
         intent.putExtra(DiscoveryServiceActivity.EXTRA_NAME, deviceName);
         intent.putExtra(DiscoveryServiceActivity.EXTRA_MAC_ADDRESS, macAddress);
@@ -122,6 +122,9 @@ public class MainActivity extends Activity {
         }
     }
 
+    /**
+     * click
+     */
     private void initClick() {
         scan_toggle_btn.setOnClickListener(new View.OnClickListener() {
             @Override

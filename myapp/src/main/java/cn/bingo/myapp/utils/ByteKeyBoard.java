@@ -5,6 +5,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
@@ -16,7 +17,7 @@ import cn.bingo.myapp.R;
 public class ByteKeyBoard {
 
     private static PopupWindow pop;
-    private static TextView textValues;
+    private static EditText textValues;
 
     private static String values = "";
 
@@ -25,7 +26,7 @@ public class ByteKeyBoard {
      *
      * @param v
      */
-    public static void ShowKeyboard(PopupWindow popupWindow, View v, Context context, View positionView, TextView textView) {
+    public static void ShowKeyboard(PopupWindow popupWindow, View v, Context context, View positionView, EditText textView) {
         if (v != null) {
             textValues = textView;
             pop = popupWindow;
