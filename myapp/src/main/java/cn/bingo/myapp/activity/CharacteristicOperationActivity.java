@@ -45,6 +45,7 @@ public class CharacteristicOperationActivity extends Activity implements View.On
     private EditText writeInput;
     private Button readButton;
     private Button writeButton;
+    private TextView notify_characteristic;
     private Button notifyButton;
     private LinearLayout main;
     private Button writeButton_2;
@@ -103,6 +104,8 @@ public class CharacteristicOperationActivity extends Activity implements View.On
         writeButton = (Button) findViewById(R.id.write);
         writeButton_2 = (Button) findViewById(R.id.write_2);
         notifyButton = (Button) findViewById(R.id.notify);
+        notify_characteristic = (TextView) findViewById(R.id.notify_characteristic);
+        notify_characteristic.setText(characteristicUuid_1.toString());
 
         connectButton.setOnClickListener(this);
         writeInput.setOnClickListener(this);
@@ -110,13 +113,14 @@ public class CharacteristicOperationActivity extends Activity implements View.On
         writeButton.setOnClickListener(this);
         writeButton_2.setOnClickListener(this);
         notifyButton.setOnClickListener(this);
+        notify_characteristic.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.write_input:
-                ByteKeyBoard.ShowKeyboard(PopupWindow, putView, CharacteristicOperationActivity.this, title,writeInput);
+                ByteKeyBoard.ShowKeyboard(PopupWindow, putView, CharacteristicOperationActivity.this, title, writeInput);
                 break;
             case R.id.connect:
                 onConnectToggleClick();
@@ -132,6 +136,10 @@ public class CharacteristicOperationActivity extends Activity implements View.On
                 break;
             case R.id.notify:
                 onNotifyClick();
+                break;
+            case R.id.notify_characteristic:
+                Log.e(getClass().getSimpleName(), "notify_characteristic--" + notify_characteristic.getText().toString());
+                characteristicUuid_2 = UUID.fromString(notify_characteristic.getText().toString());
                 break;
         }
     }

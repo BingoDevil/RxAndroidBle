@@ -78,6 +78,7 @@ public class MainActivity extends Activity {
                 recyclerView.setLayoutManager(recyclerLayoutManager);
                 resultsAdapter = new ScanResultsAdapter();
                 subscriber.onNext(resultsAdapter);
+                subscriber.onCompleted();
             }
         });
         Subscriber<ScanResultsAdapter> subscriber = new Subscriber<ScanResultsAdapter>() {
