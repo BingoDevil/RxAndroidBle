@@ -1,11 +1,13 @@
 package cn.bingo.myapp.activity;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -13,6 +15,8 @@ import android.widget.TextView;
 import com.polidea.rxandroidble.RxBleConnection;
 import com.polidea.rxandroidble.RxBleDevice;
 import com.polidea.rxandroidble.RxBleDeviceServices;
+
+import java.lang.reflect.Method;
 
 import cn.bingo.myapp.R;
 import cn.bingo.myapp.SampleApplication;
@@ -47,6 +51,24 @@ public class DiscoveryServiceActivity extends Activity {
         deviceName = getIntent().getStringExtra(EXTRA_NAME);
         macAddress = getIntent().getStringExtra(EXTRA_MAC_ADDRESS);
         bleDevice = SampleApplication.getRxBleClient(this).getBleDevice(macAddress);
+
+        // 连接建立之前的先配对
+        /*try {
+            BluetoothDevice bl = bleDevice.getBluetoothDevice();
+            Log.e(getClass().getSimpleName(), "" + bl.getName());
+            if (bl.getBondState() == BluetoothDevice.BOND_NONE) {
+                Method creMethod;
+                try {
+                    creMethod = BluetoothDevice.class.getMethod("createBond");
+                    creMethod.invoke(bl);
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+                Log.e(getClass().getSimpleName(), "开始配对");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
         initView();
         initClick();
 
@@ -123,6 +145,14 @@ public class DiscoveryServiceActivity extends Activity {
                                 onConnectionFailure(throwable);
                             }
                         });
+                /*try {
+                    BluetoothDevice bl = bleDevice.getBluetoothDevice();
+                    Log.e(getClass().getSimpleName(),""+bl.getName());
+                    bl.setPairingConfirmation(true);
+                    bl.createBond();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }*/
             }
         });
     }
