@@ -11,12 +11,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import com.polidea.rxandroidble.RxBleClient;
@@ -26,10 +23,6 @@ import com.polidea.rxandroidble.exceptions.BleScanException;
 import cn.bingo.myapp.R;
 import cn.bingo.myapp.SampleApplication;
 import cn.bingo.myapp.adapter.ScanResultsAdapter;
-import cn.bingo.myapp.utils.MyPixle;
-import rx.Observable;
-import rx.Observer;
-import rx.Subscriber;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
@@ -70,42 +63,19 @@ public class MainActivity extends Activity {
         initView();
         initClick();
 
-        Observable<ScanResultsAdapter> observable = Observable.create(new Observable.OnSubscribe<ScanResultsAdapter>() {
+        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager recyclerLayoutManager = new LinearLayoutManager(MainActivity.this);
+        recyclerView.setLayoutManager(recyclerLayoutManager);
+        resultsAdapter = new ScanResultsAdapter();
+        recyclerView.setAdapter(resultsAdapter);
+        resultsAdapter.setOnAdapterItemClickListener(new ScanResultsAdapter.OnAdapterItemClickListener() {
             @Override
-            public void call(Subscriber<? super ScanResultsAdapter> subscriber) {
-                recyclerView.setHasFixedSize(true);
-                LinearLayoutManager recyclerLayoutManager = new LinearLayoutManager(MainActivity.this);
-                recyclerView.setLayoutManager(recyclerLayoutManager);
-                resultsAdapter = new ScanResultsAdapter();
-                subscriber.onNext(resultsAdapter);
-                subscriber.onCompleted();
+            public void onAdapterViewClick(View view) {
+                final int childAdapterPosition = recyclerView.getChildAdapterPosition(view);
+                final RxBleScanResult itemAtPosition = resultsAdapter.getItemAtPosition(childAdapterPosition);
+                onAdapterItemClick(itemAtPosition);
             }
         });
-        Subscriber<ScanResultsAdapter> subscriber = new Subscriber<ScanResultsAdapter>() {
-            @Override
-            public void onCompleted() {
-
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onNext(ScanResultsAdapter scanResultsAdapter) {
-                recyclerView.setAdapter(resultsAdapter);
-                resultsAdapter.setOnAdapterItemClickListener(new ScanResultsAdapter.OnAdapterItemClickListener() {
-                    @Override
-                    public void onAdapterViewClick(View view) {
-                        final int childAdapterPosition = recyclerView.getChildAdapterPosition(view);
-                        final RxBleScanResult itemAtPosition = resultsAdapter.getItemAtPosition(childAdapterPosition);
-                        onAdapterItemClick(itemAtPosition);
-                    }
-                });
-            }
-        };
-        observable.subscribe(subscriber);
     }
 
     /**

@@ -125,7 +125,8 @@ public class DiscoveryServiceActivity extends Activity {
                                 return rxBleConnection.discoverServices();
                             }
                         })
-                        .first() // Disconnect automatically after discovery
+                        .first()
+                        // Disconnect automatically after discovery
                         // .compose(bindUntilEvent(PAUSE))
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnUnsubscribe(new Action0() {
